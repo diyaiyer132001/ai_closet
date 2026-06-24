@@ -1,0 +1,9 @@
+# Phase 1 — server
+fastapi
+uvicorn[standard]
+python-dotenv
+
+# Phase 2+ — database & AI (install now, used in later phases)
+sqlalchemy
+anthropic
+pillow
