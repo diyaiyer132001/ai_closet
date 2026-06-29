@@ -3,6 +3,9 @@ fastapi
 uvicorn[standard]
 python-dotenv
 
+# Phase 3 — file uploads (FastAPI requires this for multipart/form-data)
+python-multipart
+
 # Phase 2+ — database & AI (install now, used in later phases)
 sqlalchemy
 anthropic
