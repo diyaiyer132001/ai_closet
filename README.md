@@ -10,7 +10,7 @@ Upload photos of your clothes → an AI vision model detects and describes each 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React + TypeScript (Vite) |
+| Frontend | React + TypeScript (Vite) + Material UI |
 | Backend | Python + FastAPI |
 | Database | SQLite (local) |
 | File storage | Local filesystem |
@@ -102,41 +102,73 @@ The `.env` file is gitignored and should never be committed.
 
 ---
 
+## How Local Storage & Caching Works
+
+### Images
+
+Uploaded photos are saved to `backend/uploads/` using a UUID filename (e.g. `a3f9c2d1-....jpg`). This folder is gitignored — images live only on your local machine.
+
+### AI Analysis Cache
+
+Every time an image is analyzed by Claude, the result (name, category, color, description, tags) is written to `backend/uploads/analysis_cache.json`. This file maps each image filename to its metadata:
+
+```json
+{
+  "a3f9c2d1-....jpg": {
+    "name": "navy blazer",
+    "category": "outerwear",
+    "color": "navy blue",
+    "description": "...",
+    "tags": ["formal", "layering"]
+  }
+}
+```
+
+### Startup Sync
+
+Every time the backend starts, it:
+
+1. Scans `backend/uploads/` for image files
+2. Checks `analysis_cache.json` for each one
+   - **Already cached** → uses the stored metadata, no API call
+   - **Not in cache** → sends the image to Claude, stores the result
+3. Wipes the database and rebuilds it from the cache
+
+This means:
+- **Restarting is cheap** — no duplicate API calls for images you've already uploaded
+- **The DB always matches the folder** — deleting an image file removes it from the app on next restart
+- **New images are picked up automatically** — drop an image into `uploads/` and restart to add it without going through the upload UI
+
+### Re-analyzing an item
+
+If Claude got something wrong, you can correct it without re-uploading. Open `http://localhost:8000/docs`, find `POST /items/{item_id}/analyze`, and run it with the item's ID. This calls Claude again, updates the DB, and overwrites the cache entry for that image.
+
+You can also manually edit `analysis_cache.json` directly — it's plain JSON. Changes take effect on the next restart.
+
+---
+
 ## Project Structure
 
 ```
 ai_closet/
 ├── backend/
-│   ├── main.py          # FastAPI app and routes
-│   ├── database.py      # SQLAlchemy setup (added in Phase 2)
+│   ├── main.py              # FastAPI app, routes, startup sync
+│   ├── ai.py                # Claude vision analysis + outfit suggestions
+│   ├── database.py          # SQLAlchemy setup
+│   ├── models.py            # Database models
 │   ├── requirements.txt
-│   ├── .env.example     # Template for environment variables
-│   └── uploads/         # Saved clothing photos (gitignored)
+│   ├── .env.example         # Template for environment variables
+│   └── uploads/             # Clothing photos + analysis_cache.json (gitignored)
 ├── frontend/
 │   └── src/
 │       ├── App.tsx
 │       ├── components/
 │       │   └── Nav.tsx
 │       └── pages/
-│           ├── Closet.tsx
-│           ├── Upload.tsx
-│           └── Suggest.tsx
+│           ├── Closet.tsx   # Browsable clothing grid with filters
+│           ├── Upload.tsx   # Photo upload with AI analysis
+│           └── Suggest.tsx  # Outfit suggestion chat
 ├── .gitignore
-├── PLAN.md              # Full project plan and phase breakdown
+├── PLAN.md
 └── README.md
 ```
-
----
-
-## Development Phases
-
-See [PLAN.md](PLAN.md) for the full breakdown. Current progress:
-
-- [x] Phase 1 — Project scaffolding
-- [ ] Phase 2 — Database schema & file storage
-- [ ] Phase 3 — Photo upload pipeline
-- [ ] Phase 4 — AI clothing detection
-- [ ] Phase 5 — Closet grid UI
-- [ ] Phase 6 — Outfit suggestion chat
-- [ ] Phase 7 — Polish
-- [ ] Phase 8 — Cloud deployment
