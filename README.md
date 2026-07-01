@@ -1,4 +1,4 @@
-# AI Closet
+# Lookbook Edit
 
 A web app that catalogs your clothing with AI and suggests outfits for any occasion.
 

@@ -6,7 +6,6 @@ import {
   Box,
   TextField,
   Button,
-  Paper,
   CircularProgress,
   Alert,
   Card,
@@ -97,25 +96,24 @@ export default function Suggest() {
   return (
     <Container
       maxWidth="md"
-      sx={{ mt: 4, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}
+      sx={{ mt: 5, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}
     >
-      <Typography variant="h4" gutterBottom>Get a Suggestion</Typography>
-      <Typography color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>Get a Suggestion</Typography>
+      <Typography color="text.secondary" sx={{ mb: 3, fontSize: '0.9rem', letterSpacing: '0.02em' }}>
         Describe an occasion and the AI stylist will suggest an outfit from your closet.
       </Typography>
 
       {/* Message area */}
-      <Paper
-        variant="outlined"
+      <Box
         sx={{
           flexGrow: 1,
           overflowY: 'auto',
-          p: 2,
+          border: '1px solid #e8e8e8',
+          p: 2.5,
           mb: 2,
-          borderRadius: 2,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: 2.5,
         }}
       >
         {/* Empty state */}
@@ -130,14 +128,28 @@ export default function Suggest() {
               gap: 1.5,
             }}
           >
-            <Typography color="text.disabled" sx={{ mb: 1 }}>Try one of these:</Typography>
+            <Typography
+              color="text.disabled"
+              sx={{ fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', mb: 1 }}
+            >
+              Try one of these
+            </Typography>
             {EXAMPLES.map(ex => (
               <Button
                 key={ex}
                 variant="outlined"
                 size="small"
                 onClick={() => setInput(ex)}
-                sx={{ textTransform: 'none', maxWidth: 420 }}
+                sx={{
+                  textTransform: 'none',
+                  maxWidth: 440,
+                  fontSize: '0.82rem',
+                  letterSpacing: '0.02em',
+                  fontWeight: 400,
+                  borderColor: '#d0d0d0',
+                  color: 'text.secondary',
+                  '&:hover': { borderColor: 'text.primary', color: 'text.primary', bgcolor: 'transparent' },
+                }}
               >
                 {ex}
               </Button>
@@ -148,59 +160,57 @@ export default function Suggest() {
         {/* Messages */}
         {messages.map((msg, i) => (
           <Box key={i}>
-            {/* Bubble */}
             <Box sx={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <Paper
-                elevation={0}
+              <Box
                 sx={{
-                  p: 1.5,
+                  p: '12px 16px',
                   maxWidth: '80%',
-                  bgcolor: msg.role === 'user' ? 'primary.main' : 'grey.100',
-                  color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                  borderRadius: msg.role === 'user'
-                    ? '16px 16px 4px 16px'
-                    : '16px 16px 16px 4px',
+                  bgcolor: msg.role === 'user' ? '#1a1a1a' : '#f5f5f5',
+                  color: msg.role === 'user' ? '#ffffff' : 'text.primary',
+                  borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                <Typography variant="body2">{msg.text}</Typography>
-              </Paper>
+                <Typography variant="body2" sx={{ lineHeight: 1.65 }}>{msg.text}</Typography>
+              </Box>
             </Box>
 
             {/* Recommended item cards */}
             {msg.role === 'ai' && msg.items && msg.items.length > 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 1.5,
-                  mt: 1.5,
-                  overflowX: 'auto',
-                  pb: 0.5,
-                }}
-              >
+              <Box sx={{ display: 'flex', gap: 1.5, mt: 1.5, overflowX: 'auto', pb: 0.5 }}>
                 {msg.items.map(item => (
                   <Card
                     key={item.id}
                     variant="outlined"
-                    sx={{ minWidth: 140, maxWidth: 140, flexShrink: 0 }}
+                    sx={{ minWidth: 130, maxWidth: 130, flexShrink: 0, border: '1px solid #e8e8e8' }}
                   >
                     <CardActionArea onClick={() => setSelected(item)}>
                       <CardMedia
                         component="img"
                         image={`http://localhost:8000/${item.image_path}`}
                         alt={item.name ?? 'Clothing item'}
-                        sx={{ height: 140, objectFit: 'cover' }}
+                        sx={{ height: 130, objectFit: 'cover', bgcolor: '#f5f5f5' }}
                       />
-                      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                      <CardContent sx={{ p: '8px 10px', '&:last-child': { pb: '8px' } }}>
                         <Typography
                           variant="caption"
-                          sx={{ fontWeight: 600, display: 'block' }}
+                          sx={{ fontWeight: 500, display: 'block', lineHeight: 1.3 }}
                           noWrap
                         >
                           {item.name ?? 'Item'}
                         </Typography>
                         {item.category && (
-                          <Chip label={item.category} size="small" color="primary" sx={{ mt: 0.5, height: 18, fontSize: '0.65rem' }} />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontSize: '0.62rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.06em',
+                              color: 'text.secondary',
+                            }}
+                          >
+                            {item.category}
+                          </Typography>
                         )}
                       </CardContent>
                     </CardActionArea>
@@ -214,30 +224,31 @@ export default function Suggest() {
         {/* Typing indicator */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <Paper
-              elevation={0}
+            <Box
               sx={{
-                px: 2, py: 1,
-                bgcolor: 'grey.100',
+                px: 2, py: 1.25,
+                bgcolor: '#f5f5f5',
                 borderRadius: '16px 16px 16px 4px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
               }}
             >
-              <CircularProgress size={14} />
-              <Typography variant="body2" color="text.secondary">Styling…</Typography>
-            </Paper>
+              <CircularProgress size={13} sx={{ color: '#6b6b6b' }} />
+              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: '0.05em' }}>
+                Styling…
+              </Typography>
+            </Box>
           </Box>
         )}
 
         <div ref={bottomRef} />
-      </Paper>
+      </Box>
 
       {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
 
       {/* Input row */}
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: 'flex', gap: 1.5 }}>
         <TextField
           fullWidth
           placeholder="e.g. I'm going to a Broadway show, what should I wear?"
@@ -248,12 +259,25 @@ export default function Suggest() {
           size="small"
           multiline
           maxRows={3}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 0,
+              fontSize: '0.875rem',
+            },
+          }}
         />
         <Button
           variant="contained"
           onClick={handleSend}
           disabled={loading || !input.trim()}
-          sx={{ alignSelf: 'flex-end', whiteSpace: 'nowrap' }}
+          sx={{
+            alignSelf: 'flex-end',
+            whiteSpace: 'nowrap',
+            px: 3,
+            py: '9px',
+            fontSize: '0.72rem',
+            letterSpacing: '0.12em',
+          }}
         >
           Send
         </Button>
@@ -265,14 +289,20 @@ export default function Suggest() {
           <>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>{selected.name ?? 'Clothing item'}</span>
-              <Button onClick={() => setSelected(null)} size="small">Close</Button>
+              <Button
+                onClick={() => setSelected(null)}
+                size="small"
+                sx={{ color: 'text.secondary', fontSize: '0.72rem', letterSpacing: '0.08em' }}
+              >
+                Close
+              </Button>
             </DialogTitle>
             <DialogContent>
               <Box
                 component="img"
                 src={`http://localhost:8000/${selected.image_path}`}
                 alt={selected.name ?? 'Clothing item'}
-                sx={{ width: '100%', maxHeight: 400, objectFit: 'contain', mb: 2, borderRadius: 1 }}
+                sx={{ width: '100%', maxHeight: 400, objectFit: 'contain', display: 'block', mb: 2, bgcolor: '#f5f5f5' }}
               />
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
                 {selected.category && <Chip label={selected.category} color="primary" size="small" />}
@@ -281,7 +311,9 @@ export default function Suggest() {
               {selected.description && (
                 <>
                   <Divider sx={{ my: 1.5 }} />
-                  <Typography variant="body2" color="text.secondary">{selected.description}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                    {selected.description}
+                  </Typography>
                 </>
               )}
               {parseTags(selected.tags).length > 0 && (

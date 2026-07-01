@@ -4,10 +4,6 @@ import {
   Container,
   Typography,
   Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  CardActionArea,
   Chip,
   Box,
   CircularProgress,
@@ -17,8 +13,6 @@ import {
   DialogContent,
   Button,
   Divider,
-  ToggleButton,
-  ToggleButtonGroup,
 } from '@mui/material'
 
 interface ClothingItem {
@@ -37,10 +31,6 @@ const CATEGORIES = ['all', 'top', 'bottom', 'dress', 'shoes', 'outerwear', 'acce
 function parseTags(tags: string | null): string[] {
   if (!tags) return []
   try { return JSON.parse(tags) } catch { return [] }
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export default function Closet() {
@@ -65,81 +55,120 @@ export default function Closet() {
   const filtered = filter === 'all' ? items : items.filter(i => i.category === filter)
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>My Closet</Typography>
+    <Container maxWidth="xl" sx={{ mt: 5, px: { xs: 2, sm: 4 } }}>
+      <Typography variant="h4" sx={{ mb: 4 }}>My Closet</Typography>
 
-      {/* Loading */}
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-          <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+          <CircularProgress size={28} sx={{ color: '#1a1a1a' }} />
         </Box>
       )}
 
-      {/* Error */}
       {error && <Alert severity="error">{error}</Alert>}
 
-      {/* Empty state */}
       {!loading && !error && items.length === 0 && (
-        <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <Typography color="text.secondary" sx={{ mb: 2 }}>
-            Your closet is empty. Upload some clothing photos to get started.
+        <Box sx={{ textAlign: 'center', mt: 12 }}>
+          <Typography color="text.secondary" sx={{ mb: 3, letterSpacing: '0.04em' }}>
+            Your closet is empty.
           </Typography>
-          <Button variant="contained" onClick={() => navigate('/upload')}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/upload')}
+            sx={{ px: 4, py: 1.5, fontSize: '0.75rem', letterSpacing: '0.12em' }}
+          >
             Upload your first item
           </Button>
         </Box>
       )}
 
-      {/* Category filter — only shown when there are items */}
+      {/* Category filter tabs */}
       {!loading && items.length > 0 && (
-        <Box sx={{ mb: 3, overflowX: 'auto' }}>
-          <ToggleButtonGroup
-            value={filter}
-            exclusive
-            onChange={(_, val) => val && setFilter(val)}
-            size="small"
-          >
-            {CATEGORIES.map(cat => (
-              <ToggleButton key={cat} value={cat}>
-                {capitalize(cat)}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 0,
+            mb: 5,
+            borderBottom: '1px solid #e8e8e8',
+            overflowX: 'auto',
+          }}
+        >
+          {CATEGORIES.map(cat => (
+            <Button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              disableRipple
+              sx={{
+                borderRadius: 0,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontSize: '0.68rem',
+                fontWeight: filter === cat ? 600 : 400,
+                color: filter === cat ? 'text.primary' : 'text.secondary',
+                borderBottom: filter === cat ? '2px solid #1a1a1a' : '2px solid transparent',
+                mb: '-1px',
+                px: 2,
+                py: 1.5,
+                minWidth: 'auto',
+                whiteSpace: 'nowrap',
+                bgcolor: 'transparent',
+                '&:hover': { bgcolor: 'transparent', color: 'text.primary' },
+              }}
+            >
+              {cat}
+            </Button>
+          ))}
         </Box>
       )}
 
-      {/* No results for this filter */}
       {!loading && !error && items.length > 0 && filtered.length === 0 && (
-        <Typography color="text.secondary">No items in this category.</Typography>
+        <Typography color="text.secondary" sx={{ letterSpacing: '0.04em' }}>
+          No items in this category.
+        </Typography>
       )}
 
-      {/* Item grid */}
-      <Grid container spacing={2}>
+      {/* Product grid */}
+      <Grid container spacing={3}>
         {filtered.map(item => (
-          <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardActionArea onClick={() => setSelected(item)} sx={{ flexGrow: 1 }}>
-                <CardMedia
-                  component="img"
-                  image={`http://localhost:8000/${item.image_path}`}
-                  alt={item.name ?? 'Clothing item'}
-                  sx={{ height: 220, objectFit: 'cover' }}
-                />
-                <CardContent>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }} noWrap>
-                    {item.name ?? 'Unnamed item'}
+          <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <Box
+              sx={{ cursor: 'pointer' }}
+              onClick={() => setSelected(item)}
+            >
+              <Box
+                component="img"
+                src={`http://localhost:8000/${item.image_path}`}
+                alt={item.name ?? 'Clothing item'}
+                sx={{
+                  width: '100%',
+                  aspectRatio: '3/4',
+                  objectFit: 'cover',
+                  display: 'block',
+                  bgcolor: '#f5f5f5',
+                  transition: 'opacity 0.25s',
+                  '&:hover': { opacity: 0.82 },
+                }}
+              />
+              <Box sx={{ pt: 1.5 }}>
+                {item.category && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.09em',
+                      color: 'text.secondary',
+                      mb: 0.25,
+                      fontSize: '0.65rem',
+                    }}
+                  >
+                    {item.category}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-                    {item.category && (
-                      <Chip label={item.category} size="small" color="primary" />
-                    )}
-                    {item.color && (
-                      <Chip label={item.color} size="small" variant="outlined" />
-                    )}
-                  </Box>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+                )}
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {item.name ?? 'Unnamed item'}
+                </Typography>
+              </Box>
+            </Box>
           </Grid>
         ))}
       </Grid>
@@ -149,30 +178,38 @@ export default function Closet() {
         {selected && (
           <>
             <DialogTitle
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                pb: 1,
+                letterSpacing: '0.02em',
+              }}
             >
               <span>{selected.name ?? 'Clothing item'}</span>
-              <Button onClick={() => setSelected(null)} size="small">Close</Button>
+              <Button
+                onClick={() => setSelected(null)}
+                size="small"
+                sx={{ color: 'text.secondary', letterSpacing: '0.08em', fontSize: '0.72rem' }}
+              >
+                Close
+              </Button>
             </DialogTitle>
             <DialogContent>
               <Box
                 component="img"
                 src={`http://localhost:8000/${selected.image_path}`}
                 alt={selected.name ?? 'Clothing item'}
-                sx={{ width: '100%', maxHeight: 400, objectFit: 'contain', mb: 2, borderRadius: 1 }}
+                sx={{ width: '100%', maxHeight: 420, objectFit: 'contain', display: 'block', mb: 2, bgcolor: '#f5f5f5' }}
               />
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                {selected.category && (
-                  <Chip label={selected.category} color="primary" size="small" />
-                )}
-                {selected.color && (
-                  <Chip label={selected.color} variant="outlined" size="small" />
-                )}
+                {selected.category && <Chip label={selected.category} color="primary" size="small" />}
+                {selected.color && <Chip label={selected.color} variant="outlined" size="small" />}
               </Box>
               {selected.description && (
                 <>
                   <Divider sx={{ my: 1.5 }} />
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
                     {selected.description}
                   </Typography>
                 </>

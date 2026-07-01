@@ -7,12 +7,8 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Card,
-  CardMedia,
-  CardContent,
   Chip,
   Divider,
-  Paper,
 } from '@mui/material'
 
 interface UploadedItem {
@@ -21,7 +17,7 @@ interface UploadedItem {
   category: string | null
   color: string | null
   description: string | null
-  tags: string | null  // JSON-encoded array e.g. '["casual","summer"]'
+  tags: string | null
   image_path: string
 }
 
@@ -95,36 +91,46 @@ export default function Upload() {
     : []
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Upload</Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
+    <Container maxWidth="sm" sx={{ mt: 6 }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>Upload</Typography>
+      <Typography color="text.secondary" sx={{ mb: 4, fontSize: '0.9rem', letterSpacing: '0.02em' }}>
         Add a photo of a clothing item to your closet.
       </Typography>
 
-      {/* Drop zone — hidden once an item has been successfully uploaded */}
       {!uploadedItem && (
         <>
+          {/* Drop zone */}
           <Box
             onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
             onClick={() => inputRef.current?.click()}
             sx={{
-              border: '2px dashed',
-              borderColor: dragging ? 'primary.main' : 'grey.400',
-              borderRadius: 2,
-              p: 5,
+              border: '1px solid',
+              borderColor: dragging ? 'text.primary' : '#d0d0d0',
+              p: 6,
               textAlign: 'center',
               cursor: 'pointer',
-              bgcolor: dragging ? 'action.hover' : 'background.paper',
+              bgcolor: dragging ? '#fafafa' : 'transparent',
               transition: 'border-color 0.2s, background-color 0.2s',
-              mb: 2,
+              mb: 3,
               userSelect: 'none',
             }}
           >
-            <Typography variant="h2" component="div" sx={{ mb: 1 }}>📷</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Drag & drop an image here</Typography>
-            <Typography variant="body2" color="text.secondary">or click to browse</Typography>
+            <Typography
+              sx={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                mb: 0.75,
+              }}
+            >
+              Drag & drop an image here
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: '0.04em' }}>
+              or click to browse
+            </Typography>
             <input
               ref={inputRef}
               type="file"
@@ -136,17 +142,16 @@ export default function Upload() {
 
           {/* Preview */}
           {preview && (
-            <Paper variant="outlined" sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ mb: 3 }}>
               <Box
                 component="img"
                 src={preview}
                 alt="Preview"
-                sx={{ width: '100%', maxHeight: 400, objectFit: 'contain', display: 'block' }}
+                sx={{ width: '100%', maxHeight: 420, objectFit: 'contain', display: 'block', bgcolor: '#f5f5f5' }}
               />
-            </Paper>
+            </Box>
           )}
 
-          {/* Upload button */}
           {file && (
             <Button
               variant="contained"
@@ -154,11 +159,11 @@ export default function Upload() {
               fullWidth
               onClick={handleUpload}
               disabled={uploading}
-              sx={{ mb: 2 }}
+              sx={{ py: 1.5, fontSize: '0.75rem', letterSpacing: '0.12em', mb: 2 }}
             >
               {uploading ? (
                 <>
-                  <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                  <CircularProgress size={16} color="inherit" sx={{ mr: 1.5 }} />
                   Analyzing with AI…
                 </>
               ) : (
@@ -171,56 +176,50 @@ export default function Upload() {
         </>
       )}
 
-      {/* AI result card */}
+      {/* Result */}
       {uploadedItem && (
         <Box>
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Item added to your closet!
-          </Alert>
+          <Alert severity="success" sx={{ mb: 3 }}>Item added to your closet.</Alert>
 
-          <Card variant="outlined">
-            <CardMedia
-              component="img"
-              image={`http://localhost:8000/${uploadedItem.image_path}`}
-              alt={uploadedItem.name ?? 'Clothing item'}
-              sx={{ maxHeight: 320, objectFit: 'contain', bgcolor: 'grey.50' }}
-            />
-            <CardContent>
-              {uploadedItem.name && (
-                <Typography variant="h6" gutterBottom>
-                  {uploadedItem.name}
-                </Typography>
-              )}
+          <Box
+            component="img"
+            src={`http://localhost:8000/${uploadedItem.image_path}`}
+            alt={uploadedItem.name ?? 'Clothing item'}
+            sx={{ width: '100%', maxHeight: 420, objectFit: 'contain', display: 'block', bgcolor: '#f5f5f5', mb: 2 }}
+          />
 
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                {uploadedItem.category && (
-                  <Chip label={uploadedItem.category} size="small" color="primary" />
-                )}
-                {uploadedItem.color && (
-                  <Chip label={uploadedItem.color} size="small" variant="outlined" />
-                )}
-              </Box>
+          {uploadedItem.name && (
+            <Typography variant="h6" sx={{ mb: 1 }}>{uploadedItem.name}</Typography>
+          )}
 
-              {uploadedItem.description && (
-                <>
-                  <Divider sx={{ my: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {uploadedItem.description}
-                  </Typography>
-                </>
-              )}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
+            {uploadedItem.category && <Chip label={uploadedItem.category} size="small" color="primary" />}
+            {uploadedItem.color && <Chip label={uploadedItem.color} size="small" variant="outlined" />}
+          </Box>
 
-              {parsedTags.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1.5 }}>
-                  {parsedTags.map((tag) => (
-                    <Chip key={tag} label={tag} size="small" variant="outlined" />
-                  ))}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+          {uploadedItem.description && (
+            <>
+              <Divider sx={{ my: 1.5 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mb: 1.5 }}>
+                {uploadedItem.description}
+              </Typography>
+            </>
+          )}
 
-          <Button variant="outlined" fullWidth sx={{ mt: 2 }} onClick={reset}>
+          {parsedTags.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 3 }}>
+              {parsedTags.map(tag => (
+                <Chip key={tag} label={tag} size="small" variant="outlined" />
+              ))}
+            </Box>
+          )}
+
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={reset}
+            sx={{ py: 1.5, fontSize: '0.75rem', letterSpacing: '0.12em' }}
+          >
             Upload Another
           </Button>
         </Box>
